@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './App.css';
-
+import Board from './Board'
 
 class App extends Component {
     constructor(props) {
@@ -10,71 +10,72 @@ class App extends Component {
             bomb : Math.floor(Math.random() * 9),
             treasure : Math.floor(Math.random() * 9),
             end: '',
-            playOn: true
+            playOn: true,
+            counter: 7,
+            score: 0,
+            highScore: 0
         }
     }
 
 
     getLocation = (e) => {
+
         let locationId = e.target.id
-
-        let { bomb, treasure, playOn} = this.state;
+        let { bomb, treasure, playOn, counter, score, highScore} = this.state;
         let newSpaces = this.state.spaces;
-        if (playOn === true) {
-            if (bomb == locationId) {
-                console.log('bomb' + this.state.bomb);
-                newSpaces[bomb] = '💣 ';
-                this.setState({spaces: newSpaces, end: 'You Lose', playOn: false})
-            } else if(treasure == locationId) {
-                console.log('treasure' + this.state.treasure );
-                newSpaces[treasure] = '❌';
-                this.setState({spaces: newSpaces, end: 'You win!', playOn: false})
 
+        if (playOn === true && counter > 0) {
+            this.setState({counter: counter-1})
+            if (counter == 1 && locationId != treasure) {
+                newSpaces[locationId] = '🌴 '
+                this.setState({end: 'You ran out of moves', playOn: false, score: 0})
+            } else if (bomb == locationId) {
+                newSpaces[bomb] = '💣 ';
+                this.setState({spaces: newSpaces, end: 'You Lose', playOn: false, score: 0})
+            } else if(treasure == locationId) {
+                newSpaces[treasure] = '❌';
+                // let newHighScore = score
+                // highScore < score && newHighScore > highScore ? this.setState({highScore: newHighScore}):
+                this.setState({spaces: newSpaces, end: 'You win!', playOn: false, score: score + 1})
             } else {
                 newSpaces[locationId] = '🌴 '
                 this.setState({spaces: newSpaces})
             }
-    } else {return;}
+
+        } else {return;}
+
 }
 
-    // board = (num) => {
-    //
-    //     const bomb = Math.floor(Math.random() * 9);
-    //     const treasure = Math.floor(Math.random() * 9);
-    //
-    // }
+    boardReset = () => {
+        let { spaces, end, playOn, counter} = this.state
+        let newBomb = Math.floor(Math.random() * 8)
+        let newTreasure = Math.floor(Math.random() * 8)
+        let newSpaces = ['✖️', '✖️', '✖️', '✖️', '✖️', '✖️', '✖️', '✖️', '✖️']
+
+        this.setState({
+            spaces: newSpaces,
+            bomb: newBomb,
+            treasure: newTreasure,
+            end: '',
+            playOn: true,
+            counter: 7
+    })
+}
 
     render() {
-        let { spaces } = this.state
+        let { spaces, end, counter, score, highScore } = this.state
 
         return (
           <div>
-            <center>
-            <h1> Treasure Hunt </h1> 
-            <h1>
-                {this.state.end}
-            </h1>
-              <table>
-                  <tbody>
-                      <tr>
-                              <td id = '0' onClick = {this.getLocation} >{spaces[0]}</td>
-                              <td id = {1} onClick = {this.getLocation} >{spaces[1]}</td>
-                              <td id = {2} onClick = {this.getLocation} >{spaces[2]}</td>
-                      </tr>
-                      <tr>
-                              <td id = {3} onClick = {this.getLocation} >{spaces[3]}</td>
-                              <td id = {4} onClick = {this.getLocation} >{spaces[4]}</td>
-                              <td id = {5} onClick = {this.getLocation}>{spaces[5]}</td>
-                      </tr>
-                      <tr>
-                              <td id = {6} onClick = {this.getLocation}>{spaces[6]}</td>
-                              <td id = {7} onClick = {this.getLocation} >{spaces[7]}</td>
-                              <td id = {8} onClick = {this.getLocation}>
-                              {spaces[8]}</td>
-                      </tr>
-                  </tbody>
-              </table>
-              </center>
+            <Board
+            onclicking ={this.getLocation}
+            spaces = {spaces}
+            end = {end}
+            boardReset = {this.boardReset}
+            counter= {counter}
+            score = {score}
+            highScore = {highScore}
+            />
           </div>
         );
       }
